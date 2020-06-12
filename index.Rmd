@@ -16,7 +16,7 @@ library(raster)
 library(rgdal)
 setwd("D:/Procesamiento/Lab4/")
 
-precipitacion <- getData("worldclim", var="prec", res=.5, lon=-84, lat=10)
+precipitacion <- getData("worldclim", var="bio", res=5, lon=-84, lat=10)
 altitude <- getData("worldclim", var="alt", res=.5, lon=-84, lat=10)
 cr_altitud <- crop(altitude, extent(-86, -82.3, 8, 11.3))
 cr_precipitacion <- crop(precipitacion, extent(-86, -82.3, 8, 11.3))
@@ -34,7 +34,7 @@ cr_quetzal <-
 Column {data-width=650}
 -----------------------------------------------------------------------
 
-### Chart A
+### Mapa de Precipitación y Altitud, visualización de Lapas verdes y Quetzales en Costa Rica.
 
 ```{r}
 pal <- colorBin(
@@ -45,7 +45,7 @@ pal <- colorBin(
 
 fny <- colorNumeric(
   palette="Blues", 
-  values(cr_precipitacion$prec1_23) , 
+  values(cr_precipitacion$bio12) , 
   na.color = "transparent"
 )
 
@@ -81,9 +81,9 @@ m <- leaflet() %>%
                  opacity = 0.5, 
                  group = "Altitud"
   ) %>%
-  addRasterImage(cr_precipitacion$prec1_23, 
+  addRasterImage(cr_precipitacion$bio12, 
                  colors = fny, 
-                 opacity = 0.7, 
+                 opacity = 0.5, 
                  group = "Precipitación"
   ) %>%
   addLayersControl(
@@ -96,7 +96,7 @@ m <- leaflet() %>%
             title = "Altitud"
             ) %>%
              addLegend( pal = fny, 
-            values = values(cr_precipitacion$prec1_23), 
+            values = values(cr_precipitacion$bio12), 
             title = "Precipitación"
 ) %>%
   addMiniMap(
