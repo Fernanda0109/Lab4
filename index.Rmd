@@ -37,14 +37,15 @@ Column {data-width=650}
 ### Chart A
 
 ```{r}
-pal1 <- colorBin(
+pal <- colorBin(
   "Oranges", 
   values(cr_altitud), 
   na.color = "transparent"
 )
-pal2 <- colorBin(
-  "Blues", 
-  values(cr_precipitacion), 
+
+fny <- colorNumeric(
+  palette="Blues", 
+  values(cr_precipitacion$prec1_23) , 
   na.color = "transparent"
 )
 
@@ -58,7 +59,7 @@ m <- leaflet() %>%
                    radius = 4,
                    fillColor = '#669900',
                    fillOpacity = 1,
-                   group = "Ara ambiguus",
+                   group = "Lapa verde",
                    popup = paste(cr_lapa_verde$locality, 
                                  cr_lapa_verde$year, 
                                  sep = '<br/>'
@@ -69,33 +70,33 @@ m <- leaflet() %>%
                    radius = 4,
                    fillColor = '#339999',
                    fillOpacity = 1,
-                   group = "Quetzal",
+                   group = "Quetzales",
                    popup = paste(cr_quetzal$locality, 
                                  cr_quetzal$year, 
                                  sep = '<br/>'
                            )
   ) %>%
   addRasterImage(cr_altitud, 
-                 colors = pal1, 
+                 colors = pal, 
                  opacity = 0.5, 
                  group = "Altitud"
   ) %>%
-  addRasterImage(cr_altitud, 
-                 colors = pal2, 
-                 opacity = 0.5, 
-                 group = "precipitación"
+  addRasterImage(cr_precipitacion$prec1_23, 
+                 colors = fny, 
+                 opacity = 0.7, 
+                 group = "Precipitación"
   ) %>%
   addLayersControl(
     baseGroups = c("OpenStreetMap", "Stamen Toner Lite", "Imágenes de ESRI"),
     overlayGroups = c("Altitud", "Precipitación", "Lapa verde", "Quetzales"),
     options = layersControlOptions(collapsed = FALSE)    
   ) %>%
-  addLegend(pal = pal1, 
+  addLegend(pal = pal, 
             values = values(cr_altitud), 
             title = "Altitud"
             ) %>%
-             addLegend(pal = pal2, 
-            values = values(cr_precipitacion), 
+             addLegend( pal = fny, 
+            values = values(cr_precipitacion$prec1_23), 
             title = "Precipitación"
 ) %>%
   addMiniMap(
