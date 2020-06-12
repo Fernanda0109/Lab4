@@ -1,0 +1,110 @@
+---
+title: "Laboratorio 04"
+Name: "Yuliany Cordero, Nicole Parra, Fernanda Zúñiga"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(sf)
+library(dplyr)
+library(leaflet)
+library(raster)
+library(rgdal)
+setwd("D:/Procesamiento/Lab4/")
+
+precipitacion <- getData("worldclim", var="prec", res=.5, lon=-84, lat=10)
+altitude <- getData("worldclim", var="alt", res=.5, lon=-84, lat=10)
+cr_altitud <- crop(altitude, extent(-86, -82.3, 8, 11.3))
+cr_precipitacion <- crop(precipitacion, extent(-86, -82.3, 8, 11.3))
+cr_lapa_verde <-
+  st_read(
+    "https://raw.githubusercontent.com/geoprocesamiento-2020i/datos/master/biodiversidad/registros-presencia/cr/cr-ara-ambiguus.geojson"
+  )
+cr_quetzal <-
+  st_read("https://raw.githubusercontent.com/geoprocesamiento-2020i/datos/master/biodiversidad/registros-presencia/cr/cr_pharomachrus_mocinno.geojson")
+
+
+
+```
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Chart A
+
+```{r}
+pal1 <- colorBin(
+  "Oranges", 
+  values(cr_altitud), 
+  na.color = "transparent"
+)
+pal2 <- colorBin(
+  "Blues", 
+  values(cr_precipitacion), 
+  na.color = "transparent"
+)
+
+# Mapa web
+m <- leaflet() %>% 
+  addProviderTiles(providers$Esri.WorldImagery, group = "Imágenes de ESRI") %>% 
+  addProviderTiles(providers$Stamen.TonerLite, group = "Stamen Toner Lite") %>%
+  addProviderTiles(providers$OpenStreetMap.Mapnik, group = "OpenStreetMap") %>%
+  addCircleMarkers(data = cr_lapa_verde,
+                   stroke = F,
+                   radius = 4,
+                   fillColor = '#669900',
+                   fillOpacity = 1,
+                   group = "Ara ambiguus",
+                   popup = paste(cr_lapa_verde$locality, 
+                                 cr_lapa_verde$year, 
+                                 sep = '<br/>'
+                           )
+  ) %>%
+   addCircleMarkers(data = cr_quetzal,
+                   stroke = F,
+                   radius = 4,
+                   fillColor = '#339999',
+                   fillOpacity = 1,
+                   group = "Quetzal",
+                   popup = paste(cr_quetzal$locality, 
+                                 cr_quetzal$year, 
+                                 sep = '<br/>'
+                           )
+  ) %>%
+  addRasterImage(cr_altitud, 
+                 colors = pal1, 
+                 opacity = 0.5, 
+                 group = "Altitud"
+  ) %>%
+  addRasterImage(cr_altitud, 
+                 colors = pal2, 
+                 opacity = 0.5, 
+                 group = "precipitación"
+  ) %>%
+  addLayersControl(
+    baseGroups = c("OpenStreetMap", "Stamen Toner Lite", "Imágenes de ESRI"),
+    overlayGroups = c("Altitud", "Precipitación", "Lapa verde", "Quetzales"),
+    options = layersControlOptions(collapsed = FALSE)    
+  ) %>%
+  addLegend(pal = pal1, 
+            values = values(cr_altitud), 
+            title = "Altitud"
+            ) %>%
+             addLegend(pal = pal2, 
+            values = values(cr_precipitacion), 
+            title = "Precipitación"
+) %>%
+  addMiniMap(
+    toggleDisplay = TRUE,
+    position = "bottomleft",
+    tiles = providers$Stamen.TonerLite
+  )
+
+m
+```
+
+
