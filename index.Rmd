@@ -16,7 +16,7 @@ library(raster)
 library(rgdal)
 setwd("D:/Procesamiento/Lab4/")
 
-precipitacion <- getData("worldclim", var="bio", res=5, lon=-84, lat=10)
+precipitacion <- getData("worldclim", var="bio", res=.5, lon=-84, lat=10)
 altitude <- getData("worldclim", var="alt", res=.5, lon=-84, lat=10)
 cr_altitud <- crop(altitude, extent(-86, -82.3, 8, 11.3))
 cr_precipitacion <- crop(precipitacion, extent(-86, -82.3, 8, 11.3))
@@ -44,8 +44,8 @@ pal <- colorBin(
 )
 
 fny <- colorNumeric(
-  palette="Blues", 
-  values(cr_precipitacion$bio12) , 
+  c("#FFFFCC", "#41B6C4", "#0C2C84", "#0000FF"), 
+  values(cr_precipitacion$bio12_23) , 
   na.color = "transparent"
 )
 
@@ -68,7 +68,7 @@ m <- leaflet() %>%
    addCircleMarkers(data = cr_quetzal,
                    stroke = F,
                    radius = 4,
-                   fillColor = '#339999',
+                   fillColor = '#FA8072',
                    fillOpacity = 1,
                    group = "Quetzales",
                    popup = paste(cr_quetzal$locality, 
@@ -81,7 +81,7 @@ m <- leaflet() %>%
                  opacity = 0.5, 
                  group = "Altitud"
   ) %>%
-  addRasterImage(cr_precipitacion$bio12, 
+  addRasterImage(cr_precipitacion$bio12_23, 
                  colors = fny, 
                  opacity = 0.5, 
                  group = "Precipitación"
@@ -93,15 +93,17 @@ m <- leaflet() %>%
   ) %>%
   addLegend(pal = pal, 
             values = values(cr_altitud), 
-            title = "Altitud"
+            title = "Altitud",
+            position = "topleft"
             ) %>%
              addLegend( pal = fny, 
-            values = values(cr_precipitacion$bio12), 
-            title = "Precipitación"
+            values = values(cr_precipitacion$bio12_23), 
+            title = "Precipitación",
+            position = "bottomleft"
 ) %>%
   addMiniMap(
     toggleDisplay = TRUE,
-    position = "bottomleft",
+    position = "bottomright",
     tiles = providers$Stamen.TonerLite
   )
 
